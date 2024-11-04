@@ -75,9 +75,9 @@ export function Navigation() {
                 <Link href="/" aria-label="Go to Home">
                   <Image
                     className="duration-300 group-hover:scale-110"
-                    width={40}
-                    height={40}
-                    src="/avatar.png"
+                    width={200}
+                    height={200}
+                    src="/avatar.jpeg"
                     alt={defaultAuthor.name}
                   />
                 </Link>

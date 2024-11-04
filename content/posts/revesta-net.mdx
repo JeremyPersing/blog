@@ -1,0 +1,131 @@
+---
+title: "Building a Company Analysis Website - Revesta.net"
+publishedDate: "2023-11-25"
+lastUpdatedDate: "2024-11-03"
+tags:
+  - Software Engineering
+  - Technology
+description: "This was the culmination of a few years of software development experience coupled with about a year of learning how to invest."
+status: published
+---
+
+<YouTubeVideo id="M8t7-2uVgiE" />
+
+## Overview
+
+Ever since I was a senior in high school, I had an interest in investments. I had an economics teacher at this time who posed us a challenge
+of crafting together a portfolio that outperformed his over the span of 10 weeks or so. The catch was that the students got to choose their
+assets and allocations (which didn't strictly have to be stocks), but he picked 10 random stocks. At the end of the 10 weeks, if you outperformed
+his portfolio then you passed the assignment, otherwise you failed it. I recall "buying into" Twitter and Zynga, and ended up passing the assignment,
+with the main takeaway being that the stock market was something very interesting that I needed to look into more.
+
+To make a long story short, some time had passed and I had read some books, put some money into the market and still had no idea what I was supposed
+to be looking for or what my strategy was. I spent about 4 years like this. Was I going to trade stocks? Was I going to buy and hold forever? Would I
+just dollar-cost average into index funds?
+
+It wasn't until I got a 'real' job, my first job out of college that had a higher salary than minimum wage, that I decided I should look into this stuff more.
+Some time spent on thinking this stuff through could quite literally yield millions of dollars in the future. So, I decided to do some research online and
+had found out about an author named Phil Town and his approach to value investing. His book _Rule #1 Investing_ was a real eye opener and taught me the basics
+about what to look for in a company, the different financial metrics I should use to guage how a company is performing, what to look for in management, and the
+proper mindset to have when buying into a stock. At the end of his book he referenced his website as a place to find stocks that fit his criteria for investment,
+and this is where the light bulb went off for me.
+
+## The Idea
+
+After reading Town's book, I had some other books that I was going to read and take into account when investing. So my thought was, "What if I just built a tool
+where I can see the methods all in one spot?" I had looked for something similar, but didn't seem to find anything. Not to mention that Town's website is $30 per
+month and other websites are about the same, so this could save some people some money.
+
+The other books I read were Peter Lynch's _One up on Wall Street_ and Joel Greenblatt's _The Little Book That Beats the Market_. Both authors are quite renowned
+investors, and both offer their insights on what to look for when doing analysis.
+
+## Execution
+
+### Getting Data
+
+Getting data was one of the hardest things about the project. It was one of those things where there was a lot of opportunity cost involved. Most data providers
+charge an arm and a leg for their product ($5K+ per month) and don't offer free tiers for their API. And you certainly don't want to learn one API, and then have it
+pulled out from underneath you with huge prices. I eventually stumbled upon a reasonably priced option and the data seemed to check out, so that's what I went with and started
+to code.
+
+### V1
+
+I chose to use Nextjs for this and used subsequently went on to use way more tech than I needed. At the beginning, the tech stack consisted of
+
+- Nextjs "front end"
+  - TailwindCSS for styling
+- Nodejs server
+- GraphQL for communication between Nextjs and Nodejs server
+- Nodejs ETL
+- Apache Airflow for ETL
+- Postgresql (only for a few days)
+- MongoDB
+
+I think one of the problems I was having is that I wanted to learn some new technologies while building because it would "pad my resume", but in the end it was just
+a waste of time and effort. I even spent time writing my own wrapper for the API in Nodejs, because I thought I would learn the API better if I did that.
+This was a massive waste of time, and I eventually scrapped it in V2.
+Watching YouTube videos on how "You should add this to 10x your development" and "This framework does x for y" certainly didn't help with this.
+The end result of V1 was a lackluster website that needed a couple different servers to run everything, for a site that only I knew about. So
+not only did the website come out looking pretty poor, but it was costing more than I had wanted it to. This was pretty disappointing because I had spent about 4-6 months
+getting to this point and I wasn't able to build the vision that I had in my head, and quite frankly, I wouldn't even use the website to do my own analysis.
+I was also doing all this development after work and on the weekends, so it felt like working 2 jobs, both of which required me to look at a screen and think all day.
+I was ready for a break and had a trip to Europe coming up, so I finished up any remaining thoughts/development and went on my trip for about 2 weeks.
+
+### V2
+
+Another 2 weeks went by before I felt like getting into the project again. I knew that I needed to simplify things and I took on the mindset that I should not be reinventing
+the wheel. Things should be fast to implement and simple. I would use component libraries, ditch Apache Airflow, and use the preexisting API wrapper to clean up my ETL scripts.
+I would use MongoDB because I wouldn't need to do any additional formatting when transferring data from the API to my database and it was easy to work with. My tech stack this
+time around was
+
+- Nextjs
+  - Material UI Component Library
+- Nodejs ETL Scripts
+- MongoDB
+
+GraphQL was causing more issues than it was solving, and I was the only person needing to specify what data pages needed, so a REST API would suffice. Nextjs also allows you to
+write API routes within your project, so there was no need to create a separate express server for connecting my Nextjs project to my database. This removed the need for CORS
+and was a lot better development experience. Material UI also offered a much better development experience than TailwindCSS, mostly because Material UI offers prebuilt components.
+There is also a pretty sweet table component that made things super easy to implement. Material UI also uses a similar way of styling when compared to TailwindCSS, so picking that
+up wasn't hard to do, and in the end it the site came out looking much better.
+
+I also had built out some wireframes of what I wanted and how the site should look and function on mobile and desktop devices. It took about 6-8 weeks to build this version and it came
+out as I had envisioned. Not only the initial combination of investment criteria, but the additional features as well. One of the features that I use the most is the screener
+because it's worldwide, and I have built into it fields that no other service offers. I also frequently use the company comparison page, portfolio comparison page, and ticker overview page
+because that's where I can easily tell how the company has been performing and how they are performing relative to peers and the market.
+
+### Getting Users
+
+This has been the hardest part and is still under way. By the time I was done with this project, I had about 1,000 subscribers on YouTube, so I thought that maybe a few of them would be interested
+in the stock market and this tool. Well, it turns out that was a bad assumption. But I have been able to make use of TikTok, Reddit, and YouTube to get a few different users.
+
+### Lessons Learned
+
+- Keep it simple. Don't reinvent the wheel, and make use of prebuilt solutions.
+- More technology probably isn't the answer.
+- The stock market analysis tools market is pretty saturated.
+- Invest in great businesses and hold them forever.
+- 100 baggers do exist and future 100 baggers are out there.
+- Return on Capital is essential.
+- PE doesn't matter as much as some believe.
+- People who sell courses/talk about stocks on YouTube are terrible investors, don't take their advice.
+- Some good people to look into are Terry Smith, Chris Mayer, Warren Buffett, and Charlie Munger.
+
+## 2024 Update
+
+Earlier in 2024 I decided to redesign the website and rename it to EquitiesList.com (because what the heck is a revesta?). In the upcoming year, I'm going to shut the site down, mostly because
+I do not want to pay for the data to keep the site up to date. The site is fully automated, so there is no overhead, but I don't find myself using the website that much anymore. In fact, I don't find myself
+looking at companies to invest in much anymore. I've found a few companies that I put some money into each paycheck, and then I put the rest into an index fund. I prefer this simplified investment approach.
+
+I also did not market the website effectively and thus do not have a paying user base to sustain the cost of the site (which is not that much). So these are the reasons I'll be shutting down the website, but this was
+still a good learning experience.
+
+Below are some pictures of how the website currently looks.
+
+![Screener alt](/equitieslist/1.png "Screener alt")
+![Screener for desktop](/equitieslist/2.png "Screener for desktop")
+![Filters for screener](/equitieslist/2_5.png "Filters for screener")
+![Columns for screener](/equitieslist/2_6.png "Columns for screener")
+![Company details](/equitieslist/3.png "Company details")
+![Company details pt 2](/equitieslist/4.png "Company details pt 2")
+![Company details pt 3](/equitieslist/5.png "Company details pt 3")

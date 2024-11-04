@@ -1,0 +1,125 @@
+---
+title: "Project Javelin - An Olympics React Native App"
+publishedDate: "2021-12-18"
+lastUpdatedDate: "2021-12-18"
+tags:
+  - Software Engineering
+  - Technology
+description: "This is the process of how Project Javelin was created and why we used the tech stack that we did."
+status: published
+---
+
+<YouTubeVideo id="5BvGuz_frJU" />
+
+## Overview
+
+Project Javelin was created as a senior project for the company [Fanalyze](https://www.fanalyze.com/).
+I joined up with a team of 7 other seniors studying Computer Science at Sacramento State
+University and we built this over a 4 month period. To get some more insight on the project and the
+team members, check out our senior project website
+[https://techknowsacstate.github.io/TechKnowWebsite/](https://techknowsacstate.github.io/TechKnowWebsite/).
+
+## Project Requirements
+
+Our client currently has a product that is centered around data aggregation for sports betting for major US sports.
+He came to us with this idea of creating a data aggregation app based upon the Olympics that gives users real time
+updates about events and athletes. He also wanted to integrate an external source of social media into the app, like
+Tik Tok, YouTube, or Twitter. So with those requirements in place we began to prototyping potential solutions.
+
+## Prototyping
+
+It was during this process that we had to clarify what
+the client actually wanted and what we could accomplish in the time span that we had, 3 months to build in total.
+We also had to think about if the user should have to create an account to use the app, how we should store any user
+data if we do have users creating accounts, and different sign in methods. Another issue we needed to reason through
+was what users should be notified about. Some people are going to want to be notified about different sports so we
+couldn't just implement a one size fits all notification type. With all of these things in mind, we decided that we
+needed to have users sign in to create an account, users should be able to choose if they want to be notified about
+any events or athletes, and users should be able to follow different events, athletes, and countries. We also thought
+that users should be able to search for different countries, athletes, and events so we needed to implement some search
+functionality. Some other cool features that we could implement were a map that tracks the location of the Olympic torch
+and a screen that allows users to compare the stats between two different athletes. In addition to these requirements,
+we also needed screens that gave detailed information on athletes and countries, such as the amount of medals a person
+has and the upcoming events for a country. On top of all this, we needed to figure out where the external social media
+should be implemented. We the home screen as a temporary solution, but knew that we'd have to get deeper into the project
+in order to determine the best spot for it. So with all of these things taken into account, the prototype below is what
+we came up with.
+
+![Prototype 1](/projectjavelin/prototype1.png)
+
+![Prototype 2](/projectjavelin/prototype2.png)
+
+![Prototype 3](/projectjavelin/prototype3.png)
+
+## The Technology stack
+
+For the front end of the app we considered three options, Xamarin, Flutter, and React Native. We ended up
+going with React Native due to its popularity and good documentation. For the backend of our app we went
+with Node js and Express because we knew that the app was going to be I/O intensive but wouldn't be
+computationally heavy. For the database, we went with MongoDB because we knew that it would scale well
+if the app amassed many users.
+
+## Learning the Technology
+
+Prior to starting this project, I had experience with React, Node js, and MongoDB but there were gaps in my
+knowledge and I didn't feel 100% confident with the technology. Because of this, I bought some courses from
+Mosh Hamedani and created some projects based off what I learned in those courses. This served me well while
+working on this project because a lot of the same concepts came up and I was familiar with how to handle them.
+
+## The Development Process
+
+For the development of the UI, we decided to use Expo. The first four weeks of development were spent on developing
+the UI. This consisted of creating various different screens and components that were based off of what the
+prototype looked like. For navigation, we used React Navigation and for the additional components and theming we
+use React Native Paper. For state management we started off using React's Context, local state, and Expo SecureStore
+for caching, but we soon found out that this led to us having to duplicate the state, which led to messy code. So we
+switched to React Query for state management and it worked beautifully with the data flow of the app.
+
+### Data Flow
+
+Our prime source of data came from an API by Data Sports Group and we got 10,000 call per hour on the plan that our
+client bought. With this limit in mind, we decided that calls to the API needed to happen on our server so that we
+could manage when to call what and how often to call it. The data from the API was also in a different schema compared
+to the data that we wanted to use in our app. So the data flow was to call the API on our backend, transform the data,
+store it in our database, and then any calls for data on the UI would get the data from our database. We make calls
+to the API every 10 minutes to see if any updates have occurred.
+
+![Data Flow](/projectjavelin/DataFlow.png)
+
+### Notifications
+
+For notifications we decided to use Expo's push notifications. These get sent during the update that happens every 10 minutes.
+We check to see if any followed athletes are competing, any results of competitions have been announced, any upcoming events
+are about to happen, and if any world or Olympic records have been set and then disperse notifications accordingly.
+
+### Search
+
+Search and autocomplete were implemented by creating an index in MongoDB for athletes, events, and countries, and then
+implemented the necessary API endpoints to utilize that index.
+
+### Login & Authentication
+
+We used Google and Facebook OAuth for this, combined with Passportjs on the backend.
+
+### Social Media Implementation
+
+This was a challenging part of the process as we thought that we could use social media APIs to view the different
+social media accounts of athletes and organizations. This was naive thinking though, as most popular social media platforms
+discontinued their public APIs or make it extremely hard to get an API key. For example, we wanted to use Instagram's
+Twitter's APIs, but Twitter denied us 3 times (with no reason given as to why), and we were unable to get access to Instagrams. Also,
+if we did get access to these APIs, the number of calls per month is extremely low so we would have had to engineer some solution
+for that. We ended up implementing a WebView of a Twitter feed and conditionally chose each account to display based upon the
+current athlete, event, or country that was being shown. The accounts had to be gathered manually, and we just stored the urls for those
+in a JSON file locally.
+
+## Lessons and Skills Learned
+
+- Use TypeScript for any large scale application as it will save a lot of time from having to debug small, hard to catch, errors
+- Expo Push notifications
+- How to implement search and autocomplete
+- React Query
+- Thinking through architectural designs
+- Take breaks from hard problems, then come back to the them and you'll
+  probably be able to devise (or at least think of) a solution
+- NoSQL Schema and Database design
+- It's good to start work early and communicate often on group projects

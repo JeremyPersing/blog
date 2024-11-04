@@ -98,7 +98,7 @@ export function CommandDialogComponent({ ...props }: DialogProps) {
           </CommandGroup>
           <CommandSeparator />
           <CommandGroup heading="Social">
-            <CommandItem
+            {/* <CommandItem
               onSelect={() => {
                 runCommand(() =>
                   navigate(defaultAuthor.socialProfiles.find((platform) => platform.name === "twitter")?.link as string)
@@ -107,7 +107,7 @@ export function CommandDialogComponent({ ...props }: DialogProps) {
             >
               <Twitter className="mr-2 h-4 w-4" />
               <span>Twitter</span>
-            </CommandItem>
+            </CommandItem> */}
             <CommandItem
               onSelect={() => {
                 runCommand(() =>

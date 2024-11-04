@@ -1,0 +1,76 @@
+---
+title: "Country Flags API: Use This in Your Application"
+publishedDate: "2021-12-17"
+lastUpdatedDate: "2021-12-17"
+tags:
+  - APIs
+  - Software Engineering
+  - Technology
+description: "Follow this guide to learn how you can use countryflagsapi.com to incorporate any country flags into your application by the country name, UN Code, ISO Alpha-2 code, or ISO Alpha-3 code."
+status: published
+---
+
+<YouTubeVideo id="OgD4oT0F8HY" />
+
+## This is Deprecated
+
+I had to stop hosting this project because I was using Heroku and they diabled their free plan. If you're interested in hosting this on your own, or simply downloading flag images,
+visit the GitHub repo here [https://github.com/JeremyPersing/countryflagsapi](https://github.com/JeremyPersing/countryflagsapi).
+
+## Introduction
+
+Head to [countryflagsapi.com](https://www.countryflagsapi.com) where you can get any country flag by the country's name,
+UN code, ISO Alpha-3 code, or ISO ALpha-2 code. If you have any suggestions on what I should add there's
+a suggestion box on the website.
+
+## Getting a Flag from User Input
+
+I'll be using React for this demo. Keep in mind this is a basic demo, but this will probably be similar to what you will want
+to use in your app.
+
+#### Imports
+
+```js
+import React, { useState } from "react";
+```
+
+#### States and Functions
+
+```js
+const [flagURL, setFlagURL] = useState("https://countryflagsapi.com/png/cuba");
+const [identifier, setIdentifier] = useState("");
+
+const handleButtonClick = () => {
+  // can use https://countryflagsapi.com/svg/ here too
+  const url = "https://countryflagsapi.com/png/";
+  setFlagURL(url + identifier);
+};
+```
+
+#### JSX
+
+```js
+<div style={{ marginBottom: '20px' }}>
+    <input
+      name="country"
+      type="text"
+      onChange={(e) => setIdentifier(e.target.value)}
+      value={identifier}
+      placeholder="Enter a country name, UN Code, ISO Alpha-2, or ISO Alpha-3 Code"
+    />
+    <button onClick={handleButtonClick}>Get Flag</button>
+</div>
+<img src={flagURL} alt="flag" />
+```
+
+## Embedding an Image
+
+Go to the flag that you want to embed and click the button labeled "Embed SVG" or "Embed PNG".
+A modal will then appear like the one shown in the image below. Go ahead and click copy and then
+paste the img element into your source code.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Modal](/countryflagsapi/countryflagsapimodal.png)
+  </div>
+</div>

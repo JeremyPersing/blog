@@ -31,10 +31,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
     },
     {
-      url: `${BASE_URL}/uses`,
-      lastModified: now,
-    },
-    {
       url: `${BASE_URL}/social`,
       lastModified: now,
     },

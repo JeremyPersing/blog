@@ -1,0 +1,235 @@
+---
+title: "How to Use Dokku With AWS"
+publishedDate: "2022-02-04"
+lastUpdatedDate: "2022-02-04"
+tags:
+  - Software Engineering
+  - Technology
+description: "This article goes in depth on how to incorporate dokku into an AWS EC2 Ubuntu instance."
+status: published
+---
+
+## Overview
+
+So most of the dokku tutorials that I've seen all use DigitalOcean and rarely use any other
+cloud platform. Because of this, I thought that I should detail the steps that I took to set
+up dokku on an AWS EC2 instance. If you're in the same situation or that sounds interesting to
+you, then keep on reading.
+
+## Step 1 - Creating an EC2 Instance
+
+Navigate to AWS and create yourself a free Ubuntu instance, I used version 20.04 LTS.
+The instructions that I took to do this are somewhere along the lines of this:
+
+- click the "Launch instance" button
+- type Ubuntu in the search bar
+- Select 20.04 LTS
+- Select t2.micro
+- Click Review and Launch
+- Edit Security groups
+- Click add rule
+  - In the Type column, select HTTP (allow inbound traffic on port 80), and it should autofill to allow all IPs
+- Click add rule
+  - In the Type column, select HTTPS (allow inbound traffic on port 443), and it should autofill to allow all IPs
+- Click Launch
+- Either create a new SSH key pair and download it or if you have an existin gpair downloaded
+  that you want to use then you can use that pair
+
+There might be a step or two that I missed in there, but if you follow those general guidlines then
+you should have a new EC2 instance up and running.
+
+## Step 2 - Connecting to Your EC2 Instance
+
+Navigate back to your instances and then click on the hyperlinked instance id. Information about the instance's IP address
+and other information should pop up. Click on connect and then click on the SSH tab. Following the instructions that are
+listed there. If you're on Windows, you can use PuTTY or Powershell to SSH into your EC2 instance.
+
+## Step 3 - Installing Dokku
+
+The first thing you should do is run `sudo apt-get update` to update any packages that have updates available. After that
+is done, if you are using Ubuntu or Debian you can follow the steps listed below, otherwise you should follow the steps
+for installing that are listed here [https://dokku.com/](https://dokku.com/).
+
+```
+ wget -nv -O - https://get.docker.com/ | sh
+ wget -nv -O - https://packagecloud.io/dokku/dokku/gpgkey | sudo apt-key add -
+ export SOURCE="https://packagecloud.io/dokku/dokku/ubuntu/"
+ export OS_ID="$(lsb_release -cs 2>/dev/null || echo "bionic")"
+ echo "bionic focal" | grep -q "$OS_ID" || OS_ID="bionic"
+ echo "deb $SOURCE $OS_ID main" | sudo tee /etc/apt/sources.list.d/dokku.list
+ sudo apt-get update
+ sudo apt-get install dokku
+ sudo dokku plugin:install-dependencies --core
+```
+
+- enable nginx-vhosts plugin - yes
+- Hostname or IP for server - use a domain if you have one, otherwise you can leave it and we'll change it later
+- enable vhost-based deployments - I put yes, but if you don't want subdomains and prefer to have different dokku
+  instance listed on different ports choose no. Here's the [docs on it](https://dokku.com/docs/configuration/domains/#disabling-vhosts)
+- keyfile for initial user - I'm not changing anything so going with Ok (both times)
+
+With these steps done, dokku should now be installed on your EC2 instance.
+
+## Step 4 - Create a Dokku App
+
+In your EC2 instance run the command `dokku apps:create appname` to create an app.
+
+# The steps after this point can happen in any order
+
+## Step 5 - Create or Add an SSH Key for Your Dokku Instance
+
+Use ssh-keygen or PuTTY to create an SSH key on your local machine. This ssh key is created so that you can push to the dokku instance. Once you've created an
+SSH key, you need to get the public key onto the dokku instance. You can do this with this command
+`cat /path/to/ssh-key-for-dokku | ssh -i "/Path/To/EC2/ssh-key" serverIP-Or-URL sudo dokku ssh-keys:add keyname`
+For a more "real life" example, here is the command that I used on a previous EC2 instance.
+`cat ~/.ssh/id_rsa.pub | ssh -i "C:\Users\Jeremy\Downloads\test.pem" ubuntu@ec2-4-73-14-162.compute-1.amazonaws.com sudo dokku ssh-keys:add jeremy`
+
+## Step 6 - Push Your code
+
+Head to the repository that you want to push to your server and run the command `git remote add dokku dokku@serverIP:dokkuAppName`
+Then run the typical git commands
+
+- git add .
+- git commit -m "some message"
+- git push dokku master
+
+If everything is configured correctly, you should see that your code is getting pushed to your server in a fashion that
+is very similar to Heroku. At the end of the displayed outcome you will see the url for where your ap is deployed. Now at this point, if you
+don't have a domain and went with the default configuration while setting up dokku, you wont be able to get to your app.
+There are two ways you can fix this. You can either use your IP address for the domain or you can get domain. If you choose to only use
+your IP, you're going to be hardpressed when it comes down to enbaling https (or at least I was). So let's get a free domain.
+
+## Step 7 - Free domain
+
+Go to [freenom.com](https://freenom.com) and type in a domain name. Once you've found a free one that you like, enter in the
+full domain (ie somefreedomain.ml) into the searchbar and you should see that it becomes available. Go through the process of
+acquiring the domain (watch the video above if you need more help) and sign into your account. Once inside your account, head to the
+part where you can change nameservers. Next, create a Cloudflare account and add the domain that you just created. Add an A record that
+points to your server's IP address. Then change the nameservers in freenom. Once this is done, configure cloudflare such that it is proxying
+and only allows for https.
+
+## Step 8 - Changing the dokku domains
+
+Go back to your EC2 terminal and run `dokku domains:set-global yourdomainname` and `dokku domains:set appname yourdomainname`.
+This should allow you to now see your app, but if you can't see your app try to restart it by running `dokku ps:rebuild` appname.
+
+## Step 9 - Environment variables
+
+If your app still isn't working then make sure that you have environment variables set. You can do this with the command of
+`dokku config:set appname KEY=value` but I would recommend you add in the `--no-restart` tag because not adding it cause me
+some headaches because my server would get stuck compiling typescript and I would have to stop it and then start it again. The
+bad thing is that when you stop and start your server, the IP address changes, which is problematic because I then had to change
+the remote git address and go modify my ssh connection## Overview
+
+So most of the dokku tutorials that I've seen all use DigitalOcean and rarely use any other
+cloud platform. Because of this, I thought that I should detail the steps that I took to set
+up dokku on an AWS EC2 instance. If you're in the same situation or that sounds interesting to
+you, then keep on reading.
+
+## Step 1 - Creating an EC2 Instance
+
+Navigate to AWS and create yourself a free Ubuntu instance, I used version 20.04 LTS.
+The instructions that I took to do this are somewhere along the lines of this:
+
+- click the "Launch instance" button
+- type Ubuntu in the search bar
+- Select 20.04 LTS
+- Select t2.micro
+- Click Review and Launch
+- Edit Security groups
+- Click add rule
+  - In the Type column, select HTTP (allow inbound traffic on port 80), and it should autofill to allow all IPs
+- Click add rule
+  - In the Type column, select HTTPS (allow inbound traffic on port 443), and it should autofill to allow all IPs
+- Click Launch
+- Either create a new SSH key pair and download it or if you have an existin gpair downloaded
+  that you want to use then you can use that pair
+
+There might be a step or two that I missed in there, but if you follow those general guidlines then
+you should have a new EC2 instance up and running.
+
+## Step 2 - Connecting to Your EC2 Instance
+
+Navigate back to your instances and then click on the hyperlinked instance id. Information about the instance's IP address
+and other information should pop up. Click on connect and then click on the SSH tab. Following the instructions that are
+listed there. If you're on Windows, you can use PuTTY or Powershell to SSH into your EC2 instance.
+
+## Step 3 - Installing Dokku
+
+The first thing you should do is run `sudo apt-get update` to update any packages that have updates available. After that
+is done, if you are using Ubuntu or Debian you can follow the steps listed below, otherwise you should follow the steps
+for installing that are listed here [https://dokku.com/](https://dokku.com/).
+
+```
+ wget -nv -O - https://get.docker.com/ | sh
+ wget -nv -O - https://packagecloud.io/dokku/dokku/gpgkey | sudo apt-key add -
+ export SOURCE="https://packagecloud.io/dokku/dokku/ubuntu/"
+ export OS_ID="$(lsb_release -cs 2>/dev/null || echo "bionic")"
+ echo "bionic focal" | grep -q "$OS_ID" || OS_ID="bionic"
+ echo "deb $SOURCE $OS_ID main" | sudo tee /etc/apt/sources.list.d/dokku.list
+ sudo apt-get update
+ sudo apt-get install dokku
+ sudo dokku plugin:install-dependencies --core
+```
+
+- enable nginx-vhosts plugin - yes
+- Hostname or IP for server - use a domain if you have one, otherwise you can leave it and we'll change it later
+- enable vhost-based deployments - I put yes, but if you don't want subdomains and prefer to have different dokku
+  instance listed on different ports choose no. Here's the [docs on it](https://dokku.com/docs/configuration/domains/#disabling-vhosts)
+- keyfile for initial user - I'm not changing anything so going with Ok (both times)
+
+With these steps done, dokku should now be installed on your EC2 instance.
+
+## Step 4 - Create a Dokku App
+
+In your EC2 instance run the command `dokku apps:create appname` to create an app.
+
+# The steps after this point can happen in any order
+
+## Step 5 - Create or Add an SSH Key for Your Dokku Instance
+
+Use ssh-keygen or PuTTY to create an SSH key on your local machine. This ssh key is created so that you can push to the dokku instance. Once you've created an
+SSH key, you need to get the public key onto the dokku instance. You can do this with this command
+`cat /path/to/ssh-key-for-dokku | ssh -i "/Path/To/EC2/ssh-key" serverIP-Or-URL sudo dokku ssh-keys:add keyname`
+For a more "real life" example, here is the command that I used on a previous EC2 instance.
+`cat ~/.ssh/id_rsa.pub | ssh -i "C:\Users\Jeremy\Downloads\test.pem" ubuntu@ec2-4-73-14-162.compute-1.amazonaws.com sudo dokku ssh-keys:add jeremy`
+
+## Step 6 - Push Your code
+
+Head to the repository that you want to push to your server and run the command `git remote add dokku dokku@serverIP:dokkuAppName`
+Then run the typical git commands
+
+- git add .
+- git commit -m "some message"
+- git push dokku master
+
+If everything is configured correctly, you should see that your code is getting pushed to your server in a fashion that
+is very similar to Heroku. At the end of the displayed outcome you will see the url for where your ap is deployed. Now at this point, if you
+don't have a domain and went with the default configuration while setting up dokku, you wont be able to get to your app.
+There are two ways you can fix this. You can either use your IP address for the domain or you can get domain. If you choose to only use
+your IP, you're going to be hardpressed when it comes down to enbaling https (or at least I was). So let's get a free domain.
+
+## Step 7 - Free domain
+
+Go to [freenom.com](https://freenom.com) and type in a domain name. Once you've found a free one that you like, enter in the
+full domain (ie somefreedomain.ml) into the searchbar and you should see that it becomes available. Go through the process of
+acquiring the domain (watch the video above if you need more help) and sign into your account. Once inside your account, head to the
+part where you can change nameservers. Next, create a Cloudflare account and add the domain that you just created. Add an A record that
+points to your server's IP address. Then change the nameservers in freenom. Once this is done, configure cloudflare such that it is proxying
+and only allows for https.
+
+## Step 8 - Changing the dokku domains
+
+Go back to your EC2 terminal and run `dokku domains:set-global yourdomainname` and `dokku domains:set appname yourdomainname`.
+This should allow you to now see your app, but if you can't see your app try to restart it by running `dokku ps:rebuild` appname.
+
+## Step 9 - Environment variables
+
+If your app still isn't working then make sure that you have environment variables set. You can do this with the command of
+`dokku config:set appname KEY=value` but I would recommend you add in the `--no-restart` tag because not adding it cause me
+some headaches because my server would get stuck compiling typescript and I would have to stop it and then start it again. The
+bad thing is that when you stop and start your server, the IP address changes, which is problematic because I then had to change
+the remote git address and go modify my ssh connection strings as they were also different.
+_Recommended command_: `dokku config:set --no-restart appname KEY=value`
+strings as they were also different.
+_Recommended command_: `dokku config:set --no-restart appname KEY=value`

@@ -19,9 +19,9 @@ export function HeroSimple({ title, subtitle }: HeroProps) {
       <div className="flex content-center items-center justify-center">
         <Image
           className="aspect-square h-10 w-10 rounded-full border border-black"
-          width={40}
-          height={40}
-          src="/avatar.png"
+          width={200}
+          height={200}
+          src="/avatar.jpeg"
           alt={defaultAuthor.name}
         />
         <p className="ml-2 font-bold text-muted-foreground">{defaultAuthor.handle}</p>

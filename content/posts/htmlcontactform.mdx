@@ -1,0 +1,52 @@
+---
+title: "How to Add an Email Contact Form to Your Website in 3 Simple Steps"
+publishedDate: "2021-12-20"
+lastUpdatedDate: "2021-12-20"
+tags:
+  - Technology
+description: "Learn how to add an email contact form to your application that does not require the user to input their email."
+status: published
+---
+
+<YouTubeVideo id="4CGN9Xh7Y8k" />
+
+## Overview
+
+Recently I was working on a project and I wanted users to be able
+to get into contact with me if they wanted adjustments to be made to the site.
+My initial idea was to add a database and implement a trigger to notify me whenever
+a new comment gets made. However, that seemed like overkill and I would have been
+using email to notify myself anyways, so I decided to go with an email solution.
+This is the process of how I implemented that solution.
+
+## Step 1
+
+Go to [postmail.invotes.com](https://postmail.invotes.com/) and enter your email
+in the input with the placeholder "Your contact email." Press "Go" and check your
+inbox for an access token.
+
+## Step 2
+
+Add the following code to your HTML file.
+
+```html
+<form action="https://postmail.invotes.com/send" method="post" id="email_form">
+  <input type="text" name="subject" placeholder="Subject" />
+  <textarea name="text" placeholder="Message"></textarea>
+  <input type="hidden" name="access_token" value="your_access_token" />
+
+  <input type="hidden" name="success_url" value="." />
+  <input type="hidden" name="error_url" value=".?err=1" />
+
+  <input id="submit_form" type="submit" value="Send" />
+</form>
+```
+
+Then replace the value "your_access_token" with the access token that got
+sent to you. I would also suggest changing the success_url and error_url values
+to the values that are unique to your application.
+
+## Step 3
+
+Add some styles to the new inputs and test it out to make sure that it works. You should
+receive a new email when a new message is sent.

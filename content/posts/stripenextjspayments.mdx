@@ -1,0 +1,188 @@
+---
+title: "Stripe Payments with Nextjs"
+publishedDate: "2023-11-01"
+lastUpdatedDate: "2023-11-01"
+tags:
+  - Software Engineering
+  - Technology
+description: "This article shows you how to implement Stripe payment links into your Nextjs project."
+status: published
+---
+
+<YouTubeVideo id="uQAf6huBIks" />
+
+Github: [stripe-next-payments](https://github.com/JeremyPersing/stripe-next-payments/tree/main)
+
+## Overview
+
+Stripe is a payments processor that allows developers like me and you to easily collect payments on our websites.
+In this post I’ll show you how you can use stripe payments in your nextjs application.
+I’m going to start from the very beginning and you can pick up wherever you want based on the steps below.
+
+## Step 1 - Creating a Nextjs project
+
+If you don’t already have it installed, install nodejs and then enter in the following command
+`npx create-next-app@latest`. I went with the following defaults.
+
+![Prototype 1](/static/images/nextjs-defaults.png)
+
+This will create a nextjs project on your machine and you will need to open this in your favorite code editor.
+Once you have that done, run the command `npm run dev` to get it running. You can then get rid of all the boilerplate
+code in the index file and you can put something like this.
+
+```
+      <h1>Stripe Payments</h1>
+      <p>A consultancy session</p>
+      <a
+        href="https://buy.stripe.com/test_00g7v64lTd9EfVS9AB"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Buy Now
+      </a>
+```
+
+## Step 2 - Create a Stripe Account
+
+This is pretty simple, just go to [stripe.com](https://stripe.com) to do this.
+
+## Step 3 - Navigate to Stripe Dashboard
+
+Once your account is created, make sure you're on the stripe dashboard and enable test mode (toggle button in the top right). Then navigate to the payments page.
+From here you'll want to
+
+- Choose the option to create a payment link.
+- Choose all of the options you want to collect from the customer.
+- Configure the after payment option. (Note: if you're using localhost to launch the stripe checkout session and set localhost:3000 (or whatever port) as the place you wish to return to in development, you will probably run into issues. The only way that I've had this work is launching from 127.0.0.1:3000 and setting the redirect to 127.0.0.1.)
+- Create the product which you're trying to sell.
+- And finally create the payment link.
+
+Then copy the link and navigate back to your code.
+
+## Step 4 - Put the Link in Your code
+
+Now is when you want to insert a link into your code on the page where you are trying to sell a product and use this link as the `href` value.
+This is all the work you will have to do on the front end. I suggest making things look pretty, but that is just an addition at this point
+(check out my website [revesta.net](https://revesta.net/pricing) if you need some inspiration ;) ).
+
+## Step 5 - Setting up the Backend
+
+Before getting started with this, make sure that you have the Stripe CLI installed. [Click me](https://stripe.com/docs/stripe-cli)
+
+- Go to the `api` folder in your project and create a new file called `webhook.ts` (if you're using typescript).
+- Install the packages `stripe` and `raw-body` (ie `npm i stripe raw-body`).
+- Create a new file called `.env.local` in the root of your project and insert the following 2 variables.
+
+```
+STRIPE_SECRET_KEY=
+WEBHOOK_SECRET=
+```
+
+- You can get the stripe secret key by navigating to your dashboard, looking for API Keys and then it should be hidden. Just unhide it and copy it, then paste it in the `.env` file.
+- Now we can start to code in `webhook.ts` so go to that file and insert the following.
+
+```
+import type { NextApiRequest, NextApiResponse } from "next";
+import Stripe from "stripe";
+import getRawBody from "raw-body";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2023-10-16",
+});
+
+const endpointSecret = process.env.WEBHOOK_SECRET as string;
+
+// Make sure to add this, otherwise you will get a stream.not.readable error
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    console.log("req.headers", req.headers);
+    if (req.method !== "POST")
+      return res.status(405).send("Only POST requests allowed");
+
+    const sig: any = req.headers["stripe-signature"];
+    const rawBody = await getRawBody(req);
+
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
+    } catch (err: any) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    console.log("event.type", JSON.stringify(event.type));
+
+    if (event.type === "checkout.session.completed") {
+      const sessionWithLineItems = await stripe.checkout.sessions.retrieve(
+        (event.data.object as any).id,
+        {
+          expand: ["line_items"],
+        }
+      );
+      const lineItems = sessionWithLineItems.line_items;
+
+      if (!lineItems) return res.status(500).send("Internal Server Error");
+
+      try {
+        // Save the data, change customer account info, etc
+        console.log("Fullfill the order with custom logic");
+        console.log("data", lineItems.data);
+        console.log(
+          "customer email",
+          (event.data.object as any).customer_details.email
+        );
+        console.log("created", (event.data.object as any).created);
+      } catch (error) {
+        console.log("Handling when you're unable to save an order");
+      }
+    }
+
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("Internal Server Error");
+  }
+}
+```
+
+To summarize, we are creating a route for stripe to send us events to. This is where we will see a checkout was successfully completed
+and handle it according (which is the last try block with all of the `console.logs`). You probably know how to read code, so I'm not going
+to go over everything, but the main points are that
+
+- We need to make sure this route only accepts POST requests.
+- We need to make sure that the request was sent by stripe.
+- We need to handle a successful checkout.
+
+## Step 6 - Forwarding Hooks
+
+Open the terminal and enter in the following command `stripe listen --forward-to localhost:3000/api/webhook`. This is telling stripe to send events to the route we just created. !Note that you should only do it this way in development.
+This will give you a webhook secret. Copy this secret and assign it to `WEBHOOK_SECRET` in your `.env` file.
+
+## Step 7 - Give it a rip
+
+Go to localhost:3000 and go through the checkout process. Use 4242 for all the credit card numbers, give it a date past the current date and enter in any address. If all goes well, the fake payment will go through.
+
+## Step 8 - Going Live
+
+Going live is how you can actually get real money from paying customers. Back in the Stripe dashboard, just untoggle the test mode and it will take you to live mode.
+
+- Go through the same process of creating products and getting your secret key.
+- Swap out the links so that they use the test payment links in development and live payment links in production (ie ->)
+
+```
+process.env.NODE_ENV === "development"
+      ? "https://buy.stripe.com/test_link"
+      : "https://buy.stripe.com/live_link",
+
+```
+
+- Register a webhook endpoint that points to your prod webhook endpoint. [Register webhooks here](https://stripe.com/docs/development/dashboard/register-webhook)
+
+That should have you on your way. I hope you found this useful, and have a great day.
