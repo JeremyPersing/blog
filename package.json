@@ -73,5 +73,16 @@
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "1.0.7",
     "typescript": "5.2.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@opentelemetry/api": "1.4.1",
+      "@opentelemetry/core": "^1.15.1",
+      "@opentelemetry/exporter-trace-otlp-grpc": "^0.41.1",
+      "@opentelemetry/resources": "^1.15.1",
+      "@opentelemetry/sdk-trace-base": "^1.15.1",
+      "@opentelemetry/sdk-trace-node": "^1.15.1",
+      "@opentelemetry/semantic-conventions": "^1.15.1"
+    }
   }
 }
