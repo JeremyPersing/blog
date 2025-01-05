@@ -20,13 +20,13 @@ export const projects = [
     mediaSrc: "/real-estate-dashboard.png",
     mediaType: "image",
   },
-  {
-    title: "Equitieslist.com",
-    description: `Stock analysis website. Built with Next.js, Typescript, Nodejs, and MongoDB.`,
-    href: "/posts/revesta-net",
-    mediaSrc: "/equitieslist/1.png",
-    mediaType: "image",
-  },
+  // {
+  //   title: "Equitieslist.com",
+  //   description: `Stock analysis website. Built with Next.js, Typescript, Nodejs, and MongoDB.`,
+  //   href: "/posts/revesta-net",
+  //   mediaSrc: "/equitieslist/1.png",
+  //   mediaType: "image",
+  // },
   {
     title: "Apartments.com Clone",
     description: `A clone of the Apartments.com mobile application. Built using Expo, React Native, Golang, and PostgreSQL.`,
